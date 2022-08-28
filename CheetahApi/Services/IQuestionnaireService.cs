@@ -6,8 +6,10 @@ namespace CheetahApi.Services
     {
         Task<QuestionnaireDto> GetQuestionnaire(string category, int count = 10);
 
-        Task<bool> SaveQuestionnaireResult(int questionnaireId, TestResult result);
+        Task<Questionnaire> GetQuestionnaire(int id);
 
-        Task<QuestionnaireStatus> UpdateStatus(int id, QuestionnaireStatus questionnaireStatus);
+        Task<QuestionnaireDto> SaveQuestionnaireResult(int questionnaireId, TestResult result);
+
+        Task<bool> UpdateStatus(int id, QuestionnaireStatus questionnaireStatus);
     }
 }

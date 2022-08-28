@@ -1,18 +1,27 @@
-﻿namespace CheetahApi.Model
+﻿using CheetahApi.Extensions;
+
+namespace CheetahApi.Model
 {
     public sealed class Questionnaire
     {
-        public Questionnaire(IEnumerable<QuizDto> quizzes)
+        public Questionnaire(string category, IEnumerable<QuizDto> quizzes)
         {
             Quizzes = quizzes;
-            Result = new List<TestResult> { new() };
+            Category = category;
+            Results = new List<TestResult> { new() };
             AttemptCount = 0;
         }
 
+        public Questionnaire()
+        {
+
+        }
+
         public int Id { get; set; }
+        public string Category { get; init; }
         public IEnumerable<QuizDto> Quizzes { get; init; }
         public QuestionnaireStatus Status { get; private set; } = QuestionnaireStatus.NotTaken;
-        public IList<TestResult> Result { get; }
+        public IList<TestResult> Results { get; set; }
 
         public int AttemptCount { get; private set; }
 
@@ -34,26 +43,21 @@
             return Status = QuestionnaireStatus.Retaken;
         }
 
-        public void UpdateCurrentResult(TestResult result)
+        public TestResultDto UpdateCurrentResult(TestResult result)
         {
-            var currentResult = Result.LastOrDefault(r => r.ResultStatus == Model.Result.Pending);
+            var currentResult = Results.LastOrDefault(r => r.ResultStatus == Result.Pending);
             if (currentResult == null)
             {
-                return;
+                return new TestResultDto(new Dictionary<int, string>(), null, false);
             }
+            currentResult.MarkedAnswers = result.MarkedAnswers;
 
-            currentResult.MarkedAnswer = result.MarkedAnswer;
-            switch (result.ResultStatus)
-            {
-                case Model.Result.Passed:
-                    currentResult.MarkPassed();
-                    break;
-                case Model.Result.Failed:
-                    currentResult.MarkFailed();
-                    break;
-                default:
-                    throw new InvalidOperationException();
-            }
+            var correctAnswerCount = Quizzes.Count(a => result.MarkedAnswers[a.Id] == a.Answer);
+            var totalQuestions = Quizzes.Count();
+
+            currentResult.SetScore(correctAnswerCount, totalQuestions);
+
+            return currentResult.ToDto();
         }
 
         public void AddNewEmptyResult()
@@ -63,7 +67,7 @@
                 throw new InvalidOperationException();
             }
 
-            Result.Add(new TestResult());
+            Results.Add(new TestResult());
         }
     }
 

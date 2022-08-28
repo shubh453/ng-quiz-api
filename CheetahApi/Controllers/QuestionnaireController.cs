@@ -4,74 +4,95 @@ using CheetahApi.Model;
 using CheetahApi.Services;
 using Microsoft.AspNetCore.Mvc;
 
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-
 namespace CheetahApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class QuestionnaireController : ControllerBase
+    public class QuestionnairesController : ControllerBase
     {
         private readonly IQuestionnaireService _questionnaireService;
-        private readonly ILogger<QuestionnaireController> _logger;
+        private readonly ILogger<QuestionnairesController> _logger;
 
-        public QuestionnaireController(IQuestionnaireService questionnaireService, ILogger<QuestionnaireController> logger)
+        public QuestionnairesController(IQuestionnaireService questionnaireService, ILogger<QuestionnairesController> logger)
         {
             _questionnaireService = questionnaireService ?? throw new ArgumentNullException(nameof(questionnaireService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        [HttpGet("{category}")]
-        public async Task<ActionResult<IEnumerable<QuizDto>>> Get(string category)
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<QuestionnaireDto>>> Get(string category, int questioncount)
         {
-            if (string.IsNullOrWhiteSpace(category))
-            {
-                return BadRequest();
-            }
-
-            var questionnaire = await _questionnaireService.GetQuestionnaire(category);
-            return Ok(questionnaire);
-        }
-
-        [HttpGet("{category}/{count:int}")]
-        public async Task<ActionResult<IEnumerable<QuizDto>>> Get(string category, int count)
-        {
-            if (string.IsNullOrWhiteSpace(category) || count <= 0)
-            {
-                return BadRequest();
-            }
-
-            var questionnaire = await _questionnaireService.GetQuestionnaire(category, count);
-            return Ok(questionnaire);
-        }
-
-        [HttpPost("{id:int}")]
-        public async Task<ActionResult<bool>> Post(int id, [FromBody] TestResultDto testResult)
-        {
-            if (!ModelState.IsValid || id < 0)
+            if (string.IsNullOrWhiteSpace(category) || questioncount <= 0)
             {
                 return BadRequest();
             }
 
             try
             {
-                var result = await _questionnaireService.SaveQuestionnaireResult(id, testResult.ToResult());
+                var questionnaire = await _questionnaireService.GetQuestionnaire(category, questioncount);
+                return Ok(new List<QuestionnaireDto> { questionnaire });
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, e.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, e.Message);
+            }
+        }
+
+        [HttpGet("{id:int}")]
+        public async Task<ActionResult<Questionnaire>> Get(int id)
+        {
+            if (id < 0)
+            {
+                return BadRequest();
+            }
+
+            try
+            {
+                var questionnaire = await _questionnaireService.GetQuestionnaire(id);
+                return Ok(questionnaire);
+            }
+            catch (NotFoundException<Questionnaire> ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return NotFound(ex.Message);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, e.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, e.Message);
+            }
+
+        }
+
+        [HttpPatch("updateanswer/{id:int}")]
+        public async Task<ActionResult<QuestionnaireDto>> updateanswer(int id, [FromBody] QuestionnaireDto questionnaire)
+        {
+            if (!ModelState.IsValid || id < 0)
+            {
+                return BadRequest();
+            }
+             
+            try
+            {
+                var result = await _questionnaireService.SaveQuestionnaireResult(id, questionnaire.TestResult.ToResult());
+                await _questionnaireService.UpdateStatus(id, QuestionnaireStatus.Completed);
                 return Ok(result);
             }
             catch (NotFoundException<Questionnaire> ex)
             {
                 _logger.LogError(ex, ex.Message);
-                return NotFound(ex);
+                return NotFound(ex.Message);
             }
             catch (Exception e)
             {
                 _logger.LogError(e, e.Message);
-                return StatusCode(StatusCodes.Status500InternalServerError, e);
+                return StatusCode(StatusCodes.Status500InternalServerError, e.Message);
             }
         }
 
         [HttpPatch("updatestatus/{id:int}")]
-        public async Task<ActionResult<QuestionnaireStatus>> Put(int id, [FromBody] QuestionnaireStatus status)
+        public async Task<ActionResult<QuestionnaireDto>> updatestatus(int id, [FromBody] QuestionnaireStatus status)
         {
             if (!ModelState.IsValid || id < 0)
             {
@@ -86,12 +107,12 @@ namespace CheetahApi.Controllers
             catch (NotFoundException<Questionnaire> ex)
             {
                 _logger.LogError(ex, ex.Message);
-                return NotFound(ex);
+                return NotFound(ex.Message);
             }
             catch (Exception e)
             {
                 _logger.LogError(e, e.Message);
-                return StatusCode(StatusCodes.Status500InternalServerError, e);
+                return StatusCode(StatusCodes.Status500InternalServerError, e.Message);
             }
         }
 

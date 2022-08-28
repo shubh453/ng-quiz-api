@@ -12,6 +12,8 @@
 
         public string Category { get; set; }
 
+        public string? AdditionalText { get; set; }
+
         public Guid UniqueIdentifier { get; set; } = Guid.NewGuid();
 
         public DateTime CreatedOnUtc { get; init; } = DateTime.UtcNow;

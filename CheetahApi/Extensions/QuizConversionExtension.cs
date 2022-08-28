@@ -8,7 +8,7 @@ namespace CheetahApi.Extensions
         {
             if (quiz == null) throw new ArgumentNullException(nameof(quiz));
 
-            return new QuizDto(quiz.Id, quiz.Question, quiz.Answer, quiz.Options, quiz.Category);
+            return new QuizDto(quiz.Id, quiz.Question, quiz.Answer, quiz.Options, quiz.Category, quiz.AdditionalText);
         }
 
         public static Quiz ToModel(this QuizDto dto)
@@ -21,6 +21,7 @@ namespace CheetahApi.Extensions
                 Options = dto.Options,
                 Question = dto.Question,
                 Category = dto.Category,
+                AdditionalText = dto.AdditionalText,
                 UniqueIdentifier = Guid.NewGuid(),
                 UpdatedOnUtc = DateTime.UtcNow,
                 CreatedOnUtc = DateTime.UtcNow

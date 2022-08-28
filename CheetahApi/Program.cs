@@ -11,7 +11,10 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddClassDependencies();
 builder.Services.AddLiteDb(builder.Configuration);
-
+builder.Services.AddCors(o =>
+{
+    o.AddDefaultPolicy(p => { p.AllowAnyMethod(); p.AllowAnyOrigin(); p.AllowAnyHeader(); });
+});
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -34,5 +37,5 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-
+app.UseCors();
 app.Run();

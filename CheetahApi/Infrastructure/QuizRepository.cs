@@ -1,4 +1,5 @@
-﻿using CheetahApi.Model;
+﻿using System.Linq.Expressions;
+using CheetahApi.Model;
 using LiteDB.Async;
 
 namespace CheetahApi.Infrastructure
@@ -14,9 +15,9 @@ namespace CheetahApi.Infrastructure
             _collection = db.GetCollection<Quiz>(EnglishQuiz);
         }
 
-        public async Task<IEnumerable<Quiz>> Get(Func<Quiz, bool> func)
+        public async Task<IEnumerable<Quiz>> Get(Expression<Func<Quiz, bool>> func)
         {
-            return await _collection.Query().Where(i => func(i)).ToListAsync();
+            return await _collection.Query().Where(func).ToListAsync();
         }
 
         public async Task<IEnumerable<Quiz>> GetAll()

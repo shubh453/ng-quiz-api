@@ -6,9 +6,14 @@ namespace CheetahApi.Extensions
     {
         public static TestResult ToResult(this TestResultDto dto)
         {
+            if (dto is null)
+            {
+                throw new ArgumentNullException(nameof(dto));
+            }
+
             var result = new TestResult
             {
-                MarkedAnswer = dto.MarkedAnswer
+                MarkedAnswers = dto.MarkedAnswer
             };
 
             if (dto.IsPassed)
@@ -21,6 +26,16 @@ namespace CheetahApi.Extensions
             }
 
             return result;
+        }
+
+        public static TestResultDto ToDto(this TestResult result)
+        {
+            if (result is null)
+            {
+                throw new ArgumentNullException(nameof(result));
+            }
+
+            return new TestResultDto(result.MarkedAnswers, result.Score, result.ResultStatus == Result.Passed);
         }
     }
 }

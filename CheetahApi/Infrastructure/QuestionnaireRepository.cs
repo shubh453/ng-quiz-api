@@ -1,5 +1,6 @@
 ﻿using CheetahApi.Model;
 using LiteDB.Async;
+using System.Linq.Expressions;
 
 namespace CheetahApi.Infrastructure
 {
@@ -14,9 +15,9 @@ namespace CheetahApi.Infrastructure
             _collection = db.GetCollection<Questionnaire>(EnglishQuestionnaire);
         }
 
-        public async Task<IEnumerable<Questionnaire>> Get(Func<Questionnaire, bool> func)
+        public async Task<IEnumerable<Questionnaire>> Get(Expression<Func<Questionnaire, bool>> func)
         {
-            return await _collection.Query().Where(i => func(i)).ToListAsync();
+            return await _collection.Query().Where(func).ToListAsync();
         }
 
         public async Task<IEnumerable<Questionnaire>> GetAll()
@@ -26,7 +27,7 @@ namespace CheetahApi.Infrastructure
 
         public async Task<Questionnaire> GetById(int id)
         {
-            return await _collection.FindByIdAsync(id);
+            return await _collection.FindOneAsync(q => q.Id == id);
         }
 
         public async Task<Questionnaire> Save(Questionnaire questionnaire)

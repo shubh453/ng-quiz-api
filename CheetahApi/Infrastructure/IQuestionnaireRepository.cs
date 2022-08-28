@@ -1,10 +1,11 @@
 ﻿using CheetahApi.Model;
+using System.Linq.Expressions;
 
 namespace CheetahApi.Infrastructure
 {
     public interface IQuestionnaireRepository
     {
-        Task<IEnumerable<Questionnaire>> Get(Func<Questionnaire, bool> func);
+        Task<IEnumerable<Questionnaire>> Get(Expression<Func<Questionnaire, bool>> func);
 
         Task<IEnumerable<Questionnaire>> GetAll();
 

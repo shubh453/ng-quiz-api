@@ -4,10 +4,11 @@
     {
         public Guid Id { get; init; } = Guid.NewGuid();
 
-        public IList<string> MarkedAnswer { get; set; } = new List<string>();
+        public IDictionary<int, string> MarkedAnswers { get; set; } = new Dictionary<int, string>();
 
         public Result ResultStatus { get; private set; } = Result.Pending;
 
+        public Score? Score { get; set; }
 
         public Result MarkPassed()
         {
@@ -17,6 +18,24 @@
         public Result MarkFailed()
         {
             return ResultStatus = Result.Failed;
+        }
+
+        public void SetScore(int obtainedMarks, int totalMarks)
+        {
+            Score = new Score
+            {
+                ObtainedMarks = obtainedMarks,
+                Total = totalMarks
+            };
+
+            if (totalMarks > 0 && (obtainedMarks * 100 / totalMarks) >= 33)
+            {
+                this.MarkPassed();
+            }
+            else
+            {
+                this.MarkFailed();
+            }
         }
     }
 
