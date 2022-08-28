@@ -7,7 +7,7 @@ EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /src
-COPY ["CheetahApi/CheetahApi.csproj", "CheetahApi/"]
+COPY ["CheetahApi.csproj", "CheetahApi/"]
 RUN dotnet restore "CheetahApi/CheetahApi.csproj"
 COPY . .
 WORKDIR "/src/CheetahApi"
